@@ -30,7 +30,7 @@ for result in ia.search_items('collection:save-page-now'):
         print(date, size, sizes[date])
 
 dates = sorted(sizes.keys())
-writer = csv.writer(open('spn2.csv', 'w'))
+writer = csv.writer(open('data.csv', 'w'))
 writer.writerow(['date', 'bytes'])
 
 for date in dates:
