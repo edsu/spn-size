@@ -5,10 +5,33 @@
 import re
 import csv
 import sys
+import time
 import internetarchive as ia
 
-def item_summary(item_id):
-    item = ia.get_item(item_id)
+def main():
+    if len(sys.argv) != 2:
+        sys.exit("usage: collect.py <collection-id>")
+
+    collection_id = sys.argv[1]
+
+    sizes = {}
+    last_size = 0
+    for result in ia.search_items(f'collection:{collection_id}'):
+        date, size = item_summary(result['identifier'])
+        if date and size: 
+            sizes[date] = sizes.get(date, 0) + size
+            print(date, size, sizes[date])
+        if len(sizes) > last_size:
+            save(collection_id, sizes)
+            last_size = len(sizes)
+
+def item_summary(item_id, tries=1):
+    try:
+        item = ia.get_item(item_id)
+    except Exception as e:
+        print("caught exception", e)
+        time.sleep(tries ** 2)
+        return item_summary(item_id, tries=tries + 1)
 
     size = 0
     if 'files' not in item.item_metadata:
@@ -23,21 +46,13 @@ def item_summary(item_id):
 
     return date, size
 
-if len(sys.argv) != 2:
-    sys.exit("usage: collect.py <collection-id>")
+def save(collection_id, sizes):
+    dates = sorted(sizes.keys())
+    writer = csv.writer(open(f'{collection_id}.csv', 'w'))
+    writer.writerow(['date', 'bytes'])
 
-collection_id = sys.argv[1]
+    for date in dates:
+        writer.writerow([date, sizes[date]])
 
-sizes = {}
-for result in ia.search_items(f'collection:{collection_id}'):
-    date, size = item_summary(result['identifier'])
-    if date and size: 
-        sizes[date] = sizes.get(date, 0) + size
-        print(date, size, sizes[date])
-
-dates = sorted(sizes.keys())
-writer = csv.writer(open(f'{collection-id}.csv', 'w'))
-writer.writerow(['date', 'bytes'])
-
-for date in dates:
-    writer.writerow([date, sizes[date]])
+if __name__ == "__main__":
+    main()
