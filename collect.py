@@ -42,7 +42,10 @@ def item_summary(item_id, tries=1):
             size += int(file['size'])
 
     m = re.match('^.+-(\d\d\d\d)(\d\d)(\d\d)', item.item_metadata['metadata']['identifier'])
-    date = '%s-%s-%s' % m.groups()
+    if m:
+        date = '%s-%s-%s' % m.groups()
+    else:
+        date = None
 
     return date, size
 
