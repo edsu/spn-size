@@ -51,7 +51,7 @@ def item_summary(item_id, tries=1):
 
 def save(collection_id, sizes):
     dates = sorted(sizes.keys())
-    writer = csv.writer(open(f'{collection_id}.csv', 'w'))
+    writer = csv.writer(open(f'data/{collection_id}.csv', 'w'))
     writer.writerow(['date', 'bytes'])
 
     for date in dates:
